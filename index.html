@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="./resources/ol.css">
+        <link rel="stylesheet" href="resources/fontawesome-all.min.css">
+        <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
+        <link rel="stylesheet" href="./resources/qgis2web.css">
+        <style>
+        html, body {
+            background-color: #ffffff;
+        }
+        .ol-control > * {
+            background-color: #f8f8f8!important;
+            color: #444444!important;
+            border-radius: 0px;
+        }
+        .ol-attribution a, .gcd-gl-input::placeholder, .search-layer-input-search::placeholder {
+            color: #444444!important;
+        }
+        .search-layer-input-search {
+            background-color: #f8f8f8!important;
+        }
+        .ol-control > *:focus, .ol-control >*:hover {
+            background-color: rgba(248, 248, 248, 0.7)!important;
+        } 
+        .ol-control {
+            background-color: rgba(255,255,255,.4) !important;
+            padding: 2px !important;
+        } 
+        </style>
+
+        <style>
+        #map {
+            width: 1316px;
+            height: 840px;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+            </div>
+        </div>
+        <script src="resources/qgis2web_expressions.js"></script>
+        <script src="./resources/functions.js"></script>
+        <script src="./resources/ol.js"></script>
+        <script src="./resources/ol-layerswitcher.js"></script>
+        <script src="resources/photon-geocoder-autocomplete.min.js"></script>
+        <script src="resources/olms.js"></script>
+        <script src="layers/CentrosEducativos_2.js"></script>
+        <script src="styles/Provincias_1_style.js"></script><script src="styles/CentrosEducativos_2_style.js"></script>
+        <script>
+            function fetchWFSProvincias_1Data(title, callback) {
+                var url = "https://geos.snitcr.go.cr/be/IGN_5_CO/wfs?SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=IGN_5_CO:limiteprovincial_5k&SRSNAME=EPSG:3857";
+
+                function fetchWithFallback(u) {
+                    return fetch(u)
+                        .then(function (r) {
+                            if (!r.ok) throw new Error("Bad response");
+                            return r.text();
+                        })
+                        .catch(function () {
+                            // Fallback AllOrigins
+                            return fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(u))
+                                .then(function (r) {
+                                    if (!r.ok) throw new Error("Proxy failed");
+                                    return r.text();
+                                });
+                        });
+                }
+
+                // Imposta un'icona di caricamento durante il fetch
+                lyr_Provincias_1.set('title', '<div class="roller-switcher" title="Fetching WFS data"></div> ' + title);
+                fetchWithFallback(url)
+                    .then(function (response) {
+                        if (typeof callback === "function") {
+                            lyr_Provincias_1.set('title', title);
+                            layerSwitcher.renderPanel();
+                            callback(null, response); // Pass null as error
+                        } else {
+                            console.error("Callback not defined.");
+                        }
+                    })
+                    .catch(function (error) {
+                        if (typeof callback === "function") {
+                            lyr_Provincias_1.set('title', '<i class="fa fa-exclamation-triangle" title="Error on fetch data"></i> ' + title);
+                            layerSwitcher.renderPanel();
+                            callback(error, null); // Pass the error
+                        } else {
+                            lyr_Provincias_1.set('title', '<i class="fa fa-exclamation-triangle" title="Error on fetch data"></i> ' + title);
+                            layerSwitcher.renderPanel();
+                            console.error("Error fetching Provincias_1 data:", error);
+                        }
+                    });
+            }
+        </script>
+        <script src="./layers/layers.js" type="text/javascript"></script> 
+        <script src="./resources/Autolinker.min.js"></script>
+        <script src="./resources/qgis2web.js"></script>
+    </body>
+</html>
